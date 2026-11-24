@@ -4,7 +4,7 @@ Interactive Sankey diagram of the use-phase and end-of-life logic of the SiToLub
 It shows how 1 kg of lubricant put on the market splits between use losses, formal and informal
 collection, and end-of-life treatment routes, depending on application, lubricant class and formulation.
 
-**Live page:** https://<your-user-or-org>.github.io/<repo-name>/
+**Live page:** [https://<your-user-or-org>.github.io/<repo-name>/](https://johoffsustain.github.io/EoL_SiToLub/)
 
 ## Model logic
 
