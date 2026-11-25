@@ -3,290 +3,66 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SiToLub Fate Explorer</title>
+<title>SiToLub LCA Tools</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: control rail left, live Sankey of lubricant mass right, equations + balance below */
-:root{
-  --bg:#f3f6f6; --panel:#ffffff; --fg:#17262b; --muted:#5b6d72; --line:#d5e0e1;
-  --accent:#16939a; --navy:#0f2f3d;
-  --c-market:#0f2f3d; --c-loss:#e8a317; --c-remain:#3f9a5b;
-  --c-comb:#e4701e; --c-emit:#7b4bb3; --c-formal:#1d6e4a; --c-informal:#9aa7aa;
-  --c-rr:#16939a; --c-fu:#3b6fb6; --c-er:#c98a2b; --c-cc:#8a6d4b; --c-hw:#b23b3b;
-  --display:"Barlow Semi Condensed","Barlow","Arial Narrow",sans-serif;
-  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
-}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0d1719; --panel:#142226; --fg:#e3eced; --muted:#93a6aa; --line:#24383c;
-  --accent:#3cc1c7; --navy:#cfe3e6; --c-market:#5d8796; --c-informal:#6d7c80; --c-formal:#2f9a68; --c-fu:#5b8fd6; --c-cc:#b08e68; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0d1719; --panel:#142226; --fg:#e3eced; --muted:#93a6aa; --line:#24383c;
-  --accent:#3cc1c7; --navy:#cfe3e6; --c-market:#5d8796; --c-informal:#6d7c80; --c-formal:#2f9a68; --c-fu:#5b8fd6; --c-cc:#b08e68; color-scheme:dark}
+/* Landing page: one card per tool, grouped by life cycle stage. Same palette as the Fate Explorer. */
+:root{--bg:#f3f6f6;--panel:#fff;--fg:#17262b;--muted:#5b6d72;--line:#d5e0e1;--accent:#16939a;--navy:#0f2f3d;
+  --display:"Barlow Semi Condensed","Barlow","Arial Narrow",sans-serif;--body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1719;--panel:#142226;--fg:#e3eced;--muted:#93a6aa;--line:#24383c;--accent:#3cc1c7;--navy:#cfe3e6;color-scheme:dark}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;overflow-x:clip}
-.wrap{max-width:1240px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
-h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,4vw,36px);margin:0;color:var(--navy);text-wrap:balance}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 var(--body)}
+.wrap{max-width:1080px;margin:0 auto;padding:40px max(16px,env(safe-area-inset-left,0px)) 56px;display:grid;gap:28px}
+h1{font:700 clamp(28px,4.5vw,40px)/1.1 var(--display);margin:0;color:var(--navy);text-wrap:balance}
 h1 span{color:var(--accent)}
-.sub{margin:4px 0 0;color:var(--muted);max-width:70ch}
-.tag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:4px 8px;border-radius:4px}
-.grid{display:grid;grid-template-columns:330px minmax(0,1fr);gap:22px;align-items:start}
-@media (max-width:880px){.grid{grid-template-columns:1fr}}
-.rail{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;display:grid;gap:18px}
-.step{display:grid;gap:8px}
-.step h2{font-family:var(--display);font-size:14px;font-weight:600;color:var(--muted);margin:0;display:flex;gap:8px;align-items:center}
-.step h2 b{font-family:var(--mono);color:var(--accent);font-weight:500}
-label.small{font-size:13px;color:var(--muted)}
-select,input[type=number]{font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%}
-input[type=range]{width:100%;accent-color:var(--accent)}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.seg{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:6px;overflow:hidden}
-.seg button{font:600 13px var(--display);background:var(--bg);color:var(--fg);border:0;border-right:1px solid var(--line);padding:10px 0;cursor:pointer;min-height:40px}
-.seg button:last-child{border-right:0}
-.seg button[aria-pressed=true]{background:var(--accent);color:#fff}
-.hint{font-size:13px;color:var(--muted);margin:0}
-.kv{font-family:var(--mono);font-size:13px;display:flex;justify-content:space-between;gap:8px}
-.flag{font-size:11px;font-family:var(--mono);color:var(--c-er);border:1px dashed var(--c-er);border-radius:3px;padding:1px 5px;white-space:nowrap}
-.routes{display:grid;gap:5px}
-.route{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:8px;align-items:center;font-size:13px}
-.route .bar{height:6px;border-radius:3px;background:var(--line);grid-column:1/-1;overflow:hidden}
-.route .bar i{display:block;height:100%;background:var(--k)}
-.route .p{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
-.comp{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:6px 8px;align-items:center;font-size:13.5px}
-.comp input{padding:5px 7px;font-family:var(--mono);font-size:14px}
-.comp .thr{grid-column:1/-1;font-size:11.5px;color:var(--muted);margin:-3px 0 2px;font-family:var(--mono)}
-.comp .hit{color:var(--c-hw)}
-.presets{display:flex;flex-wrap:wrap;gap:6px}
-.presets button{font:500 13px var(--body);background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:6px 11px;cursor:pointer}
-.presets button:hover{border-color:var(--accent)}
-.state{font-size:13px;border-radius:6px;padding:8px 10px;border:1px solid var(--line);background:var(--bg)}
-.state b{display:block;font-family:var(--display);font-size:14px}
-.state.s1{border-color:var(--c-er)}.state.s2{border-color:var(--c-hw)}
-.stage{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0;display:grid;gap:14px}
-.scroll{overflow-x:auto}
-svg text{fill:var(--fg);font-family:var(--body)}
-svg .nlab{font-size:13px;font-weight:600}
-svg .nval{font-size:12px;font-family:var(--mono);fill:var(--muted)}
-svg .colh{font-family:var(--display);font-size:12px;fill:var(--muted)}
-.link{transition:opacity .15s}
-.link:hover{opacity:.85!important}
-@media (prefers-reduced-motion:reduce){.link{transition:none}}
-.bal{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
-.bal>div{border-top:3px solid var(--k);padding:8px 2px 0}
-.bal .v{font-family:var(--mono);font-size:19px;font-variant-numeric:tabular-nums}
-.bal .l{font-size:12.5px;color:var(--muted)}
-.eq{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-.eq div{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px;min-width:0}
-.eq code{font-family:var(--mono);font-size:12.5px;display:block;overflow-x:auto;white-space:nowrap;padding-bottom:2px}
-.eq p{margin:4px 0 0;font-size:12.5px;color:var(--muted)}
-footer{font-size:13px;color:var(--muted);display:grid;gap:4px}
-footer b{color:var(--fg);font-weight:600}
+.sub{margin:8px 0 0;color:var(--muted);max-width:68ch}
+h2{font:600 15px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+a.card{display:grid;gap:6px;align-content:start;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:inherit;text-decoration:none}
+a.card:hover{border-color:var(--accent)}
+a.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a.card b{font:600 19px var(--display);color:var(--navy)}
+a.card span{color:var(--muted);font-size:14.5px}
+a.card code{font:12px var(--mono);color:var(--accent)}
+ul.files{margin:0;padding-left:18px;color:var(--muted);font-size:14.5px}
+ul.files a{color:var(--accent)}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px;max-width:90ch}
 </style>
 </head>
 <body>
-<div class="wrap">
+<main class="wrap">
   <header>
-    <div>
-      <h1>SiToLub <span>Fate Explorer</span></h1>
-      <p class="sub">How 1 kg of lubricant put on the market splits between use losses, collection and end-of-life routes in the SiToLub model.</p>
-    </div>
-    <span class="tag">D5.1 · Eq. 1, 4, 5</span>
+    <h1>SiToLub <span>LCA tools</span></h1>
+    <p class="sub">Interactive tools behind the life cycle assessment in SiToLub (deliverable D5.1). They cover how lubricant performance enters the functional unit and what happens to the lubricant at the end of its life.</p>
   </header>
 
-  <div class="grid">
-    <aside class="rail" aria-label="Model parameters">
-      <section class="step">
-        <h2><b>1</b> Application → use losses</h2>
-        <select id="app" aria-label="Application"></select>
-        <div class="kv"><span>F<sub>losses</sub></span><span id="lossOut"></span></div>
-        <p class="hint">Losses per application (Zimmermann et al., 2025).</p>
-      </section>
+  <section>
+    <h2>Functional unit and use phase</h2>
+    <div class="cards">
+      <a class="card" href="functional-units/questionnaire.html"><code>questionnaire</code><b>FU Questionnaire</b><span>Answer a few questions on scope, application and use pattern. You get the functional unit, the reference flow, the openLCA parameters and text for the report.</span></a>
+      <a class="card" href="functional-units/explorer.html"><code>explorer</code><b>FU Explorer</b><span>Formulas for all lubricant classes and all five scopes, the applied system examples (car, machining, deep drawing) and the parameter map.</span></a>
+      <a class="card" href="functional-units/lifecycle-map.html"><code>map</code><b>Full Life Cycle Map</b><span>Use case → module → database flow, and the exchange threshold for corrosion protection.</span></a>
+    </div>
+  </section>
 
-      <section class="step">
-        <h2><b>2</b> Class → fate of losses</h2>
-        <div class="seg" id="cls" role="group" aria-label="Lubricant class"></div>
-        <div class="kv"><span>combustion / emission</span><span id="clsOut"></span></div>
-        <p class="hint" id="clsHint"></p>
-      </section>
+  <section>
+    <h2>End of life</h2>
+    <div class="cards">
+      <a class="card" href="fate-explorer/"><code>fate</code><b>Fate Explorer</b><span>Sankey of 1 kg lubricant put on the market: use losses, collection and end-of-life routes by application, class and formulation.</span></a>
+    </div>
+  </section>
 
-      <section class="step">
-        <h2><b>3</b> Collection of remaining</h2>
-        <div class="kv"><span>formal / informal</span><span id="collOut"></span></div>
-        <p class="hint">Fixed collection rate in the model <span class="flag">source to confirm</span></p>
-        <p class="hint">Informal disposal: combustion without flue-gas treatment or dumping, split 50 / 50 (no-bias; Pinheiro et al., 2021).</p>
-      </section>
+  <section>
+    <h2>Data and models</h2>
+    <ul class="files">
+      <li><a href="data/SiToLub_FU_matrix.xlsx">FU matrix</a> (Excel): functional units, reference flows and formulas per lubricant class</li>
+      <li><a href="data/SiToLub_scopes_MWF_example.xlsx">MWF additive example</a> (Excel): one additive taken through all five scopes</li>
+      <li><a href="docs/openlca-formulas.md">openLCA parameters and formulas</a> for the parametrised ecoinvent processes (the JSON-LD itself is not published, as it contains licensed ecoinvent data)</li>
+    </ul>
+  </section>
 
-      <section class="step">
-        <h2><b>4</b> Formulation → re-refinability</h2>
-        <div class="presets" id="presets"></div>
-        <div class="comp" id="comp"></div>
-        <div class="state" id="state" aria-live="polite"></div>
-      </section>
-
-      <section class="step">
-        <h2><b>5</b> Formal treatment routes</h2>
-        <div class="routes" id="routes"></div>
-        <p class="hint">EU average, weighted by WLO volume, from GEIR data (Stahl &amp; Merz, 2020, Annex X).</p>
-      </section>
-    </aside>
-
-    <main class="stage">
-      <div class="scroll"><svg id="sankey" role="img" aria-label="Sankey diagram of lubricant mass flows" width="960" height="540" viewBox="0 0 960 540"></svg></div>
-      <div class="bal" id="bal"></div>
-      <div class="eq">
-        <div><code>m<sub>use,lost</sub> = m · F<sub>losses,i</sub> · (F<sub>comb</sub> + F<sub>dump</sub>)</code><p>Eq. 1: losses by application <i>i</i>, split by class.</p></div>
-        <div><code>m<sub>EoL,inf</sub> = m · (1 − F<sub>losses,i</sub>) · F<sub>informal</sub> · (½ + ½)</code><p>Eq. 4: informal disposal, no-bias split.</p></div>
-        <div><code>m<sub>EoL,formal</sub> = m · (1 − F<sub>losses,i</sub>) · F<sub>formal</sub> · Σ F<sub>route</sub></code><p>Eq. 5: formal routes, set by formulation thresholds.</p></div>
-      </div>
-    </main>
-  </div>
-
-  <footer>
-    <div><b>Data:</b> use losses from Zimmermann et al. (2025), UBA Texte 39/2025 (Ökopol). Classes ALL / PLL / TLL from the EU Ecolabel (EC JRC, 2017), FFL from ATIEL &amp; UEIL (2025). Splits of losses are SiToLub assumptions. Formal routes from Stahl &amp; Merz (2020).</div>
-    <div><b>Thresholds:</b> as in the SiToLub openLCA parameters. Hazardous waste incineration for Cl &gt; 2000 ppm follows EU waste oil legislation. Formulation presets are example values.</div>
-    <div><b>Not shown:</b> composition-based emissions (HF, HCl, …) from combusted and emitted fractions, and 50 km transport of collected WLO (API, 2023).</div>
-  </footer>
-</div>
-
-<script>
-{
-const APPS=[
- ["Engine oils",46.7,"PLL"],["Compressor oils",48.1,"ALL"],["Turbine oils (excl. aviation)",28.6,"ALL"],
- ["Gear oils",23.7,"ALL"],["Hydraulic oils",25.3,"ALL"],["Transformer / electrical insulating oils",9.6,"ALL"],
- ["Machine oils",51.1,"ALL"],["Machining oils (metalworking fluids)",54.2,"ALL"],["Base oils",53.4,"ALL"],
- ["Process oils",100,"TLL"],["Greases",100,"TLL"],["Other industrial oils (non-lubricating)",100,"FFL"]
-];
-const CLS={ALL:[95,5,"Accidental loss lubricant"],PLL:[75,25,"Partial loss lubricant"],TLL:[0,100,"Total loss lubricant"],FFL:[100,0,"Filled-for-life: parts recycled pyrometallurgically"]};
-/* GEIR EU average (Stahl & Merz, 2020): re-ref 60.9, fuel 24.0, power plant 7.0, cement 3.8, other use 4.3, disposal 0 */
-const ROUTES=[
- {id:"rr",l:"Re-refining",k:"--c-rr",base:0.609},
- {id:"fu",l:"Fuel conversion",k:"--c-fu",base:0.240},
- {id:"er",l:"Energy recovery (power plant)",k:"--c-er",base:0.070},
- {id:"cc",l:"Co-combustion (cement)",k:"--c-cc",base:0.038},
- {id:"hw",l:"Incineration / other use",k:"--c-hw",base:0.043}
-];
-/* composition parameters, as mass fractions in the model */
-const COMP=[
- {id:"cl",l:"Chlorine",u:"ppm",f:1e-6,thr:"inhibits > 499 ppm · hazardous > 1990 ppm"},
- {id:"fl",l:"Fluorine",u:"ppm",f:1e-6,thr:"no re-refining + hazardous > 499 ppm"},
- {id:"si",l:"Silicon",u:"wt %",f:1e-2,thr:"inhibits > 4.99 wt %"},
- {id:"bio",l:"Biodegradable mass",u:"wt %",f:1e-2,thr:"inhibits > 3 wt %"},
- {id:"gly",l:"Glycol content",u:"wt %",f:1e-2,thr:"inhibits > 1 wt %"}
-];
-const PRESETS=[
- ["Mineral reference",{cl:0,fl:0,si:0,bio:0,gly:0}],
- ["MCCP (Cl)",{cl:150000,fl:0,si:0,bio:0,gly:0}],
- ["PFAS / PTFE (F)",{cl:0,fl:3000,si:0,bio:0,gly:0}],
- ["Bio-ester",{cl:0,fl:0,si:0,bio:60,gly:0}]
-];
-const COLL=82.5; /* fixed formal collection rate, % of remaining */
-const $=id=>document.getElementById(id);
-const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const f=x=>x.toFixed(x>=10?1:2)+" %";
-
-const appSel=$("app");
-appSel.innerHTML=APPS.map((a,i)=>`<option value="${i}">${a[0]} · ${a[1]} %</option>`).join("");
-appSel.value=7;
-let cls="ALL";
-$("cls").innerHTML=Object.keys(CLS).map(k=>`<button type="button" id="cls${k}">${k}</button>`).join("");
-Object.keys(CLS).forEach(k=>$("cls"+k).onclick=()=>{cls=k;render()});
-appSel.onchange=()=>{cls=APPS[appSel.value][2];render()};
-$("comp").innerHTML=COMP.map(c=>`<label for="c_${c.id}">${c.l} <span class="hint">(${c.u})</span></label><input type="number" id="c_${c.id}" min="0" step="any" value="0"><div class="thr" id="t_${c.id}">${c.thr}</div>`).join("");
-$("presets").innerHTML=PRESETS.map((p,i)=>`<button type="button" id="p${i}">${p[0]}</button>`).join("");
-PRESETS.forEach((p,i)=>$("p"+i).onclick=()=>{COMP.forEach(c=>$("c_"+c.id).value=p[1][c.id]);render()});
-COMP.map(c=>"c_"+c.id).forEach(id=>$(id).addEventListener("input",render));
-
-/* SiToLub logic: any threshold exceeded -> no re-refining; F > 499 ppm or Cl > 1990 ppm -> hazardous incineration only */
-function routeShares(){
-  const v={};COMP.forEach(c=>v[c.id]=Math.max(0,+$("c_"+c.id).value||0)*c.f);
-  const hits={cl:v.cl>0.000499,fl:v.fl>0.000499,si:v.si>0.0499,bio:v.bio>0.03,gly:v.gly>0.01};
-  const inhib=hits.cl||hits.fl||hits.si||hits.bio||hits.gly;
-  const haz=inhib&&(v.fl>0.000499||v.cl>0.00199);
-  const s={};
-  if(!inhib) ROUTES.forEach(r=>s[r.id]=r.base);
-  else if(haz) ROUTES.forEach(r=>s[r.id]=r.id==="hw"?1:0);
-  else{const rest=1-ROUTES[0].base;ROUTES.forEach(r=>s[r.id]=r.id==="rr"?0:r.base/rest)}
-  return {s,inhib,haz,hits,v};
-}
-
-function compute(){
-  const L=APPS[appSel.value][1],[pc,pe]=CLS[cls];
-  const R=100-L,fc=COLL,F=R*fc/100,I=R-F;
-  const rs=routeShares();
-  const out={L,R,pc,pe,fc,F,I,lc:L*pc/100,le:L*pe/100,ic:I/2,ie:I/2,rs};
-  ROUTES.forEach(r=>out[r.id]=F*rs.s[r.id]);
-  return out;
-}
-
-function render(){
-  const m=compute(),rs=m.rs;
-  $("lossOut").textContent=`${m.L} % lost · ${(100-m.L).toFixed(1)} % remain`;
-  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",b.textContent===cls));
-  $("clsOut").textContent=`${m.pc} / ${m.pe}`;
-  $("clsHint").textContent=CLS[cls][2]+".";
-  $("collOut").textContent=`${m.fc.toFixed(1)} / ${(100-m.fc).toFixed(1)} %`;
-  const hitF=rs.v.fl>0.000499, hitCl2=rs.v.cl>0.00199;
-  $("t_cl").className="thr"+(rs.hits.cl?" hit":"");$("t_si").className="thr"+(rs.hits.si?" hit":"");
-  $("t_bio").className="thr"+(rs.hits.bio?" hit":"");$("t_gly").className="thr"+(rs.hits.gly?" hit":"");
-  $("t_fl").className="thr"+(hitF?" hit":"");
-  const st=$("state");
-  if(rs.haz){st.className="state s2";st.innerHTML=`<b>Hazardous waste incineration</b>${hitCl2&&hitF?"Cl above 1990 ppm and F above 499 ppm":hitCl2?"Cl above 1990 ppm":"F above 499 ppm"}: re-refining is not possible, all collected oil is incinerated.`}
-  else if(rs.inhib){st.className="state s1";st.innerHTML="<b>Not re-refinable</b>A threshold is exceeded: re-refining share goes to 0; the other routes are scaled up to 100 %."}
-  else{st.className="state";st.innerHTML=`<b>Re-refinable</b>No threshold exceeded: collected oil follows the GEIR EU average.`}
-  $("routes").innerHTML=ROUTES.map(r=>{const p=rs.s[r.id]*100;return `<div class="route" style="--k:var(${r.k})"><span>${r.l}</span><span class="p">${p.toFixed(1)} %</span><div class="bar"><i style="width:${p}%"></i></div></div>`}).join("");
-  drawSankey(m);drawBalance(m);
-}
-
-function drawSankey(m){
-  const svg=$("sankey"),H=540,top=36,bot=12,nw=14,gap=24;
-  const cols=[20,215,425,640];
-  const N={
-    mk:{c:0,l:"Lubricant on market",v:100,k:"--c-market"},
-    lo:{c:1,l:"Use losses",v:m.L,k:"--c-loss"},
-    re:{c:1,l:"Remaining after use",v:m.R,k:"--c-remain"},
-    lc:{c:2,l:"Lost · combusted",v:m.lc,k:"--c-comb"},
-    le:{c:2,l:"Lost · emitted",v:m.le,k:"--c-emit"},
-    fo:{c:2,l:"Formal collection",v:m.F,k:"--c-formal"},
-    in:{c:2,l:"Informal disposal",v:m.I,k:"--c-informal"},
-    uc:{c:3,l:"Uncontrolled combustion",v:m.lc+m.ic,k:"--c-comb"},
-    em:{c:3,l:"Emission to water",v:m.le+m.ie,k:"--c-emit"}
-  };
-  ROUTES.forEach(r=>N[r.id]={c:3,l:r.l,v:m[r.id],k:r.k});
-  const LK=[["mk","lo",m.L],["mk","re",m.R],["lo","lc",m.lc],["lo","le",m.le],["re","fo",m.F],["re","in",m.I],
-    ["lc","uc",m.lc],["le","em",m.le],["in","uc",m.ic],["in","em",m.ie],...ROUTES.map(r=>["fo",r.id,m[r.id]])];
-  const byCol=[[],[],[],[]];Object.entries(N).forEach(([id,n])=>{n.id=id;if(n.v>1e-9||n.c<3)byCol[n.c].push(n)});
-  const avail=H-top-bot,maxN=7;
-  const scale=(avail-gap*(maxN-1))/100;
-  byCol.forEach(col=>{
-    const tot=col.reduce((a,n)=>a+n.v*scale,0)+gap*(col.length-1);
-    let y=top+(avail-tot)/2;
-    col.forEach(n=>{n.h=n.v*scale;n.y=y;n.x=cols[n.c];n.out=0;n.in=0;y+=n.h+gap});
-  });
-  let s=["Put on market","Use phase","Fate","End sink"].map((t,i)=>`<text class="colh" x="${cols[i]}" y="18">${t}</text>`).join("");
-  LK.forEach(([a,b,v])=>{
-    if(v<=1e-9)return;const A=N[a],B=N[b],h=v*scale;
-    const x0=A.x+nw,x1=B.x,y0=A.y+A.out+h/2,y1=B.y+B.in+h/2;A.out+=h;B.in+=h;
-    const cx=(x0+x1)/2;
-    s+=`<path class="link" d="M${x0},${y0}C${cx},${y0} ${cx},${y1} ${x1},${y1}" stroke="${css(B.k)}" stroke-width="${Math.max(h,.6)}" fill="none" opacity=".45"><title>${A.l} → ${B.l}: ${f(v)}</title></path>`;
-  });
-  byCol.flat().forEach(n=>{
-    const zero=n.v<=1e-9,hh=Math.max(n.h,1.5),ty=n.y+hh/2;
-    s+=`<rect x="${n.x}" y="${n.y}" width="${nw}" height="${hh}" fill="${css(n.k)}" opacity="${zero?.3:1}" rx="2"><title>${n.l}: ${f(n.v)}</title></rect>`;
-    s+=`<text class="nlab" x="${n.x+nw+7}" y="${ty-2}" opacity="${zero?.45:1}">${n.l}</text><text class="nval" x="${n.x+nw+7}" y="${ty+13}">${f(n.v)}</text>`;
-  });
-  svg.innerHTML=s;
-}
-
-function drawBalance(m){
-  const items=[["Uncontrolled combustion",m.lc+m.ic,"--c-comb"],["Emission to water",m.le+m.ie,"--c-emit"],...ROUTES.map(r=>[r.l,m[r.id],r.k])];
-  $("bal").innerHTML=items.map(([l,v,k])=>`<div style="--k:var(${k})"><div class="v">${f(v)}</div><div class="l">${l}</div></div>`).join("");
-}
-render();
-const mq=matchMedia("(prefers-color-scheme: dark)");mq.addEventListener("change",render);
-const themeObs=new MutationObserver(render);themeObs.observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
-}
-</script>
+  <footer>Developed in the SiToLub project, co-funded by the European Union under Grant Agreement No. 101138807. Views and opinions expressed are those of the author(s) only and do not necessarily reflect those of the European Union or the Health and Digital Executive Agency (HaDEA). Neither the European Union nor the granting authority can be held responsible for them.</footer>
+</main>
 </body>
 </html>

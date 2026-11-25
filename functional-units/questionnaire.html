@@ -1,0 +1,605 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>SiToLub FU Questionnaire</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&display=swap">
+<style>
+/* Layout: questionnaire on the left (numbered, since answers build on each other), composed model on the right; report text and openLCA parameters below */
+:root{
+  --bg:#f3f4f2; --panel:#ffffff; --fg:#1d2327; --muted:#5d676d; --line:#dde1dd; --code-bg:#f7f7f4;
+  --acc:#1f6f78; --acc-bg:#e3f1f2; --warn:#a35f00; --warn-bg:#fbf1e2; --good:#2f7a4f; --good-bg:#e2f1e7;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15191b; --panel:#1d2225; --fg:#e6e9e7; --muted:#9aa4a9; --line:#2f363a; --code-bg:#171b1d;
+  --acc:#5fc0c9; --acc-bg:#16302f; --warn:#e8a33d; --warn-bg:#33291a; --good:#6cc28e; --good-bg:#1c3226; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#15191b; --panel:#1d2225; --fg:#e6e9e7; --muted:#9aa4a9; --line:#2f363a; --code-bg:#171b1d;
+  --acc:#5fc0c9; --acc-bg:#16302f; --warn:#e8a33d; --warn-bg:#33291a; --good:#6cc28e; --good-bg:#1c3226; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--f-body);padding-inline:16px;padding-block:22px 40px}
+.wrap{max-width:1280px;margin:0 auto;display:grid;gap:16px}
+.eyebrow{font:500 .72rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 1.7rem/1.15 var(--f-display);margin:.2rem 0 0;text-wrap:balance}
+header p{margin:.35rem 0 0;color:var(--muted);max-width:75ch}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;font-size:.84rem;color:var(--muted)}
+.presets button{all:unset;cursor:pointer;padding:3px 9px;border:1px solid var(--line);border-radius:99px;font-size:.8rem;color:var(--fg);background:var(--panel)}
+.presets button:focus-visible{outline:2px solid var(--acc)}
+.app{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:16px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;min-width:0}
+.q{padding-block:12px;border-bottom:1px solid var(--line)} .q:first-child{padding-top:0} .q:last-child{border-bottom:0;padding-bottom:0}
+.q h2{font:600 .95rem var(--f-body);margin:0 0 2px;display:flex;gap:8px;align-items:baseline}
+.q h2 .no{font:600 .78rem var(--f-mono);color:var(--acc)}
+.q p.hint{margin:0 0 8px;color:var(--muted);font-size:.82rem}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opt{all:unset;cursor:pointer;box-sizing:border-box;padding:7px 11px;border:1px solid var(--line);border-radius:6px;font-size:.86rem;background:var(--bg)}
+.opt small{display:block;color:var(--muted);font-size:.74rem}
+.opt[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-bg);box-shadow:0 0 0 1px var(--acc) inset}
+.opt:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.opt[disabled]{opacity:.4;cursor:not-allowed}
+.q[hidden]{display:none}
+.res h3{font:600 1.35rem var(--f-display);margin:0}
+.badge{display:inline-block;font:500 .74rem var(--f-mono);padding:3px 9px;border-radius:99px;background:var(--acc-bg);color:var(--acc);margin-top:6px}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:8px 14px;margin-top:14px;font-size:.92rem}
+.kv dt{color:var(--muted);font:500 .72rem var(--f-mono);letter-spacing:.05em;text-transform:uppercase;padding-top:3px}
+.kv dd{margin:0;min-width:0}
+.formula{background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;font:.82rem/1.55 var(--f-mono);overflow-x:auto;white-space:pre-wrap;margin-bottom:6px}
+.note-em{background:var(--warn-bg);border-radius:6px;padding:8px 11px;font-size:.86rem;margin-bottom:6px}
+.lbl{font:500 .72rem var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+.sels{display:grid;gap:8px}
+.sel{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;justify-content:space-between}
+.sel span{font-size:.86rem} .sel code{font:.76rem var(--f-mono);color:var(--muted)}
+.sel select{font:.86rem var(--f-body);padding:5px 8px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--fg);max-width:100%}
+.params{display:grid;gap:9px}
+.prm{display:grid;grid-template-columns:minmax(0,1fr) 92px 92px 64px 48px;gap:4px 8px;align-items:center}
+.prm .chg{font:500 .78rem var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted);text-align:right}
+.prm code{font:.82rem var(--f-mono);overflow-wrap:anywhere} .prm small{grid-column:1/-1;color:var(--muted);font-size:.77rem;margin-top:-4px}
+.prm input{width:100%;font:.85rem var(--f-mono);padding:5px 6px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--fg);font-variant-numeric:tabular-nums}
+.prm input:disabled{opacity:.5}
+.prm input:focus-visible,.sel select:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.prm .u{font-size:.77rem;color:var(--muted)}
+.prm.head span{font:500 .68rem var(--f-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.flows{margin-top:14px;overflow-x:auto}
+.flows table{border-collapse:collapse;width:100%;min-width:420px;font-size:.88rem}
+.flows th,.flows td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.flows th{font:500 .68rem var(--f-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.flows td:first-child,.flows th:first-child{text-align:left}
+.flows td.d{color:var(--good);font-weight:600} .flows td.up{color:var(--warn);font-weight:600}
+.flows tr.sub td{text-align:left;font:500 .68rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:14px}
+.flowf{font:.76rem var(--f-mono);color:var(--muted);display:block}
+.bottom{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:16px;align-items:start}
+.vhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap} .vhead .lbl{margin:0}
+.btn{all:unset;cursor:pointer;font:500 .82rem var(--f-body);padding:6px 12px;border:1px solid var(--line);border-radius:6px}
+.btn:focus-visible{outline:2px solid var(--acc)}
+#verbal{display:grid;gap:12px;margin-top:12px}
+.vb h4{font:500 .72rem var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+.vb p{margin:0;font-size:.94rem;line-height:1.55} .vb ul{margin:0;padding-left:1.1rem;font-size:.94rem}
+.olca{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:10px}
+.olca td,.olca th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+.olca th{font:500 .66rem var(--f-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.olca code{font:.76rem var(--f-mono);overflow-wrap:anywhere}
+.olcawrap{overflow-x:auto}
+.foot{font-size:.8rem;color:var(--muted)}
+@media (max-width:960px){.app,.bottom{grid-template-columns:1fr}}
+@media (max-width:520px){.kv{grid-template-columns:1fr}.prm{grid-template-columns:minmax(0,1fr) 70px 70px 56px}.prm .u{display:none}}
+.flows td{white-space:nowrap}.flows td:first-child{white-space:normal}
+.groups{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grp{border:1.5px solid var(--acc);border-radius:8px;padding:10px;display:grid;gap:8px;align-content:start}
+.grp.fun{border-color:var(--warn)}
+.gl{font:600 .7rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+.grp.fun .gl{color:var(--warn)}
+.opts.col{flex-direction:column}
+.opts.col .opt{width:100%}
+@media (max-width:520px){.groups{grid-template-columns:1fr}}
+.nobench .prm{grid-template-columns:minmax(0,1fr) 110px 48px}
+.nobench .prm input[data-s="b"],.nobench .prm .chg,.nobench .prm.head span:nth-child(3),.nobench .prm.head span:nth-child(4){display:none}
+.nobench .flows th:nth-child(2),.nobench .flows td:nth-child(2),.nobench .flows th:nth-child(4),.nobench .flows td:nth-child(4){display:none}
+.nobench .prm small{grid-column:1/-1}
+.olca.onecol th:nth-child(4),.olca.onecol td:nth-child(4){display:none}
+.onecolp .prm{grid-template-columns:minmax(0,1fr) 110px 48px}
+.onecolp .prm input[data-s="b"],.onecolp .prm .chg,.onecolp .prm.head span:nth-child(3),.onecolp .prm.head span:nth-child(4){display:none}
+.onecolp .prm small{grid-column:1/-1}
+.chgin{width:100%;font:.8rem var(--f-mono);padding:5px 4px;border:1px dashed var(--line);border-radius:5px;background:var(--bg);color:var(--fg);text-align:right}
+.chgin:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.onecolp .prm .chgin{display:none}
+.perbar{display:flex;align-items:center;gap:6px;margin-top:14px;font:500 .72rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.perbar button{all:unset;cursor:pointer;padding:4px 10px;border:1px solid var(--line);border-radius:99px;font:500 .8rem var(--f-body);text-transform:none;letter-spacing:0;color:var(--fg)}
+.perbar button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.perbar button:focus-visible{outline:2px solid var(--acc)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">SiToLub · D5.1 · Functional unit builder</div>
+    <h1>Build the functional unit from how the lubricant is used</h1>
+    <p>Choose the scope first: three lubricant-focused scopes and two functional ones. The following questions adapt to it, and the model on the right is assembled from your answers.</p>
+    <div class="presets" id="presets"><span>Start from an example:</span></div>
+  </header>
+
+  <div class="app">
+    <section class="panel" id="quest" aria-label="Questionnaire"></section>
+    <section class="panel res" id="result" aria-live="polite"></section>
+  </div>
+
+  <div class="bottom">
+    <section class="panel" aria-label="Report text">
+      <div class="vhead"><p class="lbl">Report text · updates with your answers and values</p><button class="btn" id="copyv" type="button">Copy text</button></div>
+      <div id="verbal"></div>
+    </section>
+    <section class="panel" aria-label="openLCA parameters">
+      <div class="vhead"><p class="lbl">openLCA parameters</p><button class="btn" id="copyp" type="button">Copy list</button></div>
+      <div class="olcawrap"><table class="olca" id="olca"></table></div>
+    </section>
+  </div>
+
+  <p class="foot">Example values only, not project data. All flows are amounts (kg, kWh, MJ); impacts come from the linked database processes in openLCA. Top-up, leakage, scrap credits and downtime costs are not modelled. Check whether openLCA writes the conditional as if() or iif().</p>
+</div>
+
+<script>
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+function fmt(x){if(!isFinite(x))return"–";if(x===0)return"0";const a=Math.abs(x);
+  if(a>=0.01&&a<1e7)return Number(x.toPrecision(4)).toLocaleString("en-US",{maximumFractionDigits:6});return x.toExponential(3);}
+const ELEC=["GLO","RER (Europe)","DE","Green (renewable)"], FUEL=["Diesel","Gasoline","HVO / biodiesel","e-fuel"];
+const MAT=["Steel, low-alloyed","Stainless steel","Cast iron","Aluminium","Copper","Brass","Hard metal (tools)"];
+/* ---------- ecoinvent system models (same as the explorer) ---------- */
+const CAR={medium:{mass:1600,diesel:0.060648},large:{mass:2000,diesel:0.076248}};
+const MWMAT={"Steel":[["steel, low-alloyed, hot rolled",1]],"Chromium steel":[["steel, chromium steel 18/8, hot rolled",1]],
+ "Aluminium":[["aluminium, wrought alloy",0.15436/0.227],["aluminium, cast alloy",0.07264/0.227]],"Copper":[["copper, cathode",1]],
+ "Average metal":[["steel, low-alloyed, hot rolled",0.187/0.227],["steel, chromium steel 18/8, hot rolled",0.00447/0.227],["aluminium, cast alloy",0.0023776/0.227],["aluminium, wrought alloy",0.0050524/0.227],["copper, cathode",0.0278/0.227]]};
+const DRAW={"single stroke":{el:0.0333,mo:12837},"automode":{el:0.000492,mo:833333}};
+const mixTxt=m=>MWMAT[m].map(([n,f])=>`${n} ${fmt(f*100)} %`).join(", ");
+const SYS=[
+ {id:"car",name:"Passenger car, diesel, EURO 3",basis:"1 km · ecoinvent transport, passenger car",
+  fu:"Transport over 1 km in a diesel passenger car, EURO 3 (ecoinvent: transport, passenger, car, diesel, medium or large size, EURO 3; RER and RoW identical)",
+  lubes:[["Lubricating oil in maintenance, passenger car","Engine Oils","32.4 kg per maintenance item = per 1,240 kg car over 150,000 km"],["Lubricating oil in engine and glider production","Engine Oils (first fill) and manufacturing oils","≈ 9.3 g per kg car"],["Waste mineral oil in maintenance","Engine Oils","same mass as the oil input"]],
+  sel:[["size","Car size (sets car mass and ecoinvent diesel)",["medium","large"]]],
+  defaults:sel=>({oil_fill:[+(32.4*CAR[sel.size].mass/(1240*150000)*15000).toPrecision(3),+(32.4*CAR[sel.size].mass/(1240*150000)*15000).toPrecision(3)],lube_production:[9.29,9.29],drain_interval:[18000,15000],diesel_consumption:[+(CAR[sel.size].diesel*0.98).toPrecision(5),CAR[sel.size].diesel],lifetime_km:[150000]}),
+  p:[["oil_fill","kg","engine oil per oil change; benchmark = ecoinvent value implied at 15,000 km (32.4 kg per 1,240 kg car over 150,000 km) · openLCA: oil_fill / oil_fill_benchmark"],
+     ["lube_production","g/kg car","lubricating oil in engine and glider production per kg car · openLCA: lube_production / lube_production_benchmark"],
+     ["drain_interval","km","engine oil drain interval · openLCA: drain_interval / drain_interval_benchmark"],
+     ["diesel_consumption","kg/km","ecoinvent default in the benchmark column · openLCA: diesel_consumption / diesel_consumption_benchmark"],
+     ["lifetime_km","km","vehicle lifetime, ecoinvent 150,000 km; same for both"]],
+  flows:[["Lubricating oil (maintenance)","g/km","oil_fill / drain_interval",(p,b,S)=>p.oil_fill/p.drain_interval*1000],
+         ["Waste mineral oil (maintenance)","g/km","same formula as the oil input",(p,b,S)=>p.oil_fill/p.drain_interval*1000],
+         ["Diesel","kg/km","diesel_consumption",p=>p.diesel_consumption],
+         ["CO₂, fossil (+ 13 fuel-proportional emissions)","kg/km","3.14 · diesel_consumption",p=>3.14*p.diesel_consumption],
+         ["Passenger car (production share)","kg/km","car_mass / lifetime_km",(p,b,S)=>CAR[S.sel.size].mass/p.lifetime_km],
+         ["Lubricating oil (car production)","g/km","lube_production / 1000 · car_mass / lifetime_km",(p,b,S)=>p.lube_production/1000*CAR[S.sel.size].mass/p.lifetime_km*1000],
+         ["Lubricating oil, total","g/km","maintenance + production",(p,b,S)=>(p.oil_fill/p.drain_interval+p.lube_production/1000*CAR[S.sel.size].mass/p.lifetime_km)*1000],
+         ["Oil changes over vehicle life","changes","lifetime_km / drain_interval",p=>p.lifetime_km/p.drain_interval],
+         ["Lubricating oil over vehicle life","kg","oil_fill · lifetime_km / drain_interval + lube_production · car_mass",(p,b,S)=>p.oil_fill*p.lifetime_km/p.drain_interval+p.lube_production/1000*CAR[S.sel.size].mass]],
+  info:S=>`Car mass ${fmt(CAR[S.sel.size].mass)} kg and ecoinvent diesel ${fmt(CAR[S.sel.size].diesel)} kg/km for the ${S.sel.size} car. ecoinvent maintenance oil: ${fmt(32.4*CAR[S.sel.size].mass/(1240*150000)*1000)} g/km.`,
+  desc:"The lubricant enters through the maintenance dataset (oil changes) and through fuel consumption. NOx, CO, PM, NMVOC and tyre, brake and road wear stay per km. Vehicle lifetime is kept equal for both lubricants.",
+  note:"Direct emissions from combustion of the engine oil are omitted. The maintenance oil is not split between engine and gear oil in ecoinvent; it is treated as engine oil.",
+  olca:"Duplicated: maintenance, passenger car (RER, RoW), passenger car production, glider production, internal combustion engine production, and transport, passenger car, diesel, medium + large, EURO 3 (RER, RoW). Global parameters oil_fill, oil_fill_benchmark, lube_production, lube_production_benchmark, drain_interval, drain_interval_benchmark, diesel_consumption, diesel_consumption_benchmark, fuel_factor (dependent), lifetime_km, lifetime_ref."},
+ {id:"mach",name:"Machining (metal working, average)",basis:"n parts × part mass · ecoinvent metal working",
+  fu:"Machining of a batch of metal parts (number of parts × part mass) (ecoinvent: metal working, average for … product manufacturing; RER and RoW)",
+  lubes:[["Lubricating oil in energy and auxilliary inputs, metal working machine","Machining Oils","0.867 g per kg product, all 8 heat-source variants"],["Waste mineral oil","Machining Oils","same mass, two disposal routes"]],
+  sel:[["material","Material machined",Object.keys(MWMAT)],["energy_source","Electricity",ELEC]],
+  defaults:()=>({n_parts:[10000],part_mass:[0.5],lube_mwf:[0.867,0.867],sump_life:[2400,2000],electricity_mwf:[1.138,1.15],machine_output_mwf:[27848,25316]}),
+  p:[["n_parts","pcs","number of parts to produce; same for both"],["part_mass","kg/pc","mass of one finished part; same for both"],
+     ["lube_mwf","g/kg","lubricating oil per kg product · openLCA: lube_mwf / lube_mwf_benchmark"],
+     ["sump_life","h","metalworking fluid sump life · openLCA: sump_life / sump_life_benchmark"],
+     ["electricity_mwf","kWh/kg","machine electricity per kg product; ecoinvent 1.15 in the benchmark column"],
+     ["machine_output_mwf","kg/kg","machine lifetime output, kg product per kg machine; ecoinvent 25,316 in the benchmark column"]],
+  flows:[["Finished parts","kg","n_parts · part_mass",p=>p.n_parts*p.part_mass],
+         ["Workpiece metal (part)","kg","n_parts · part_mass, of the selected material",p=>p.n_parts*p.part_mass,"material"],
+         ["Metal removed as chips (to recycling)","kg","0.227 · n_parts · part_mass",p=>0.227*p.n_parts*p.part_mass,"material"],
+         ["Lubricating oil","kg","lube_mwf / 1000 · sump_life_benchmark / sump_life · n_parts · part_mass",(p,b)=>p.lube_mwf/1000*b.sump_life/p.sump_life*p.n_parts*p.part_mass],
+         ["Lubricating oil per part","g/pc","lube_mwf · sump_life_benchmark / sump_life · part_mass",(p,b)=>p.lube_mwf*b.sump_life/p.sump_life*p.part_mass],
+         ["Waste mineral oil","kg","same as lubricating oil",(p,b)=>p.lube_mwf/1000*b.sump_life/p.sump_life*p.n_parts*p.part_mass],
+         ["Electricity","kWh","electricity_mwf · n_parts · part_mass",p=>p.electricity_mwf*p.n_parts*p.part_mass,"energy_source"],
+         ["Metal working machine","kg","n_parts · part_mass / machine_output_mwf",p=>p.n_parts*p.part_mass/p.machine_output_mwf]],
+  info:S=>`Chips composition (ecoinvent): ${mixTxt(S.sel.material)}.`,
+  desc:"ecoinvent models the metalworking fluid as consumption per kg product (0.867 g/kg, average of 8 companies) without a sump or drain interval, so the sump life ratio scales it. 0.227 kg of metal per kg product is removed as chips and credited as scrap. Solvent (1.4 g/kg) and tetrachloroethylene for degreasing stay fixed.",
+  note:"The workpiece metal itself is not part of the ecoinvent metal working dataset; add it as a separate input in the product system. ecoinvent has no separate tool flow.",
+  olca:"Duplicated: all 8 energy and auxilliary inputs, metal working machine variants, both markets, and the 5 metal working, average processes (RER, RoW). Choose the process for the selected material. Global parameters lube_mwf, lube_mwf_benchmark, sump_life, sump_life_benchmark, electricity_mwf, electricity_mwf_benchmark, machine_output_mwf, machine_output_mwf_benchmark. Set the product system amount to n_parts · part_mass."},
+ {id:"draw",name:"Deep drawing, steel, 650 kN press",basis:"n parts × part mass · ecoinvent deep drawing",
+  fu:"Deep drawing of a batch of steel parts (number of parts × part mass) (ecoinvent: deep drawing, steel, 650 kN press, single stroke or automode; RER and RoW)",
+  lubes:[["None in ecoinvent","Process oils","drawing lubricant and degreasing are not included; added by SiToLub"]],
+  sel:[["mode","Press mode",["single stroke","automode"]],["energy_source","Electricity",ELEC]],
+  defaults:sel=>({n_parts:[10000],part_mass:[0.3],lube_forming:[1.6,2.0],electricity_forming:[+(DRAW[sel.mode].el*0.97).toPrecision(4),DRAW[sel.mode].el],machine_output_forming:[Math.round(DRAW[sel.mode].mo*1.2),DRAW[sel.mode].mo]}),
+  p:[["n_parts","pcs","number of parts to produce; same for both"],["part_mass","kg/pc","mass of one formed part; same for both"],
+     ["lube_forming","g/kg","drawing lubricant per kg formed; example values, ecoinvent has none (benchmark column = your reference lubricant) · openLCA: lube_forming (in kg/kg)"],
+     ["electricity_forming","kWh/kg","press electricity per kg formed; ecoinvent default in the benchmark column"],
+     ["machine_output_forming","kg/kg","press and die lifetime output, kg formed per kg machine; ecoinvent default in the benchmark column"]],
+  flows:[["Formed parts","kg","n_parts · part_mass",p=>p.n_parts*p.part_mass],
+         ["Steel sheet (part)","kg","n_parts · part_mass",p=>p.n_parts*p.part_mass],
+         ["Lubricating oil (added)","kg","lube_forming · n_parts · part_mass",p=>p.lube_forming/1000*p.n_parts*p.part_mass],
+         ["Lubricating oil per part","g/pc","lube_forming · part_mass",p=>p.lube_forming*p.part_mass],
+         ["Waste mineral oil (added)","kg","same as lubricating oil",p=>p.lube_forming/1000*p.n_parts*p.part_mass],
+         ["Electricity","kWh","electricity_forming · n_parts · part_mass",p=>p.electricity_forming*p.n_parts*p.part_mass,"energy_source"],
+         ["Metal working machine","kg","n_parts · part_mass / machine_output_forming",p=>p.n_parts*p.part_mass/p.machine_output_forming]],
+  info:S=>`ecoinvent ${S.sel.mode}: ${fmt(DRAW[S.sel.mode].el)} kWh/kg and ${fmt(DRAW[S.sel.mode].mo)} kg formed per kg machine.`,
+  desc:"The lubricant changes the amount applied per kg formed, the press electricity (lower friction, lower drawing force) and the press and die lifetime.",
+  note:"The sheet itself and degreasing after forming are not part of the ecoinvent dataset; add the sheet as a separate input in the product system.",
+  olca:"Duplicated: deep drawing single stroke and automode (RER, RoW) with added lubricating oil and waste mineral oil exchanges. Global parameters lube_forming (kg/kg), electricity_forming, electricity_forming_benchmark, machine_output_forming, machine_output_forming_benchmark. Set the product system amount to n_parts · part_mass."}
+];
+
+
+/* ---------- questions ---------- */
+const A={ploss:"no",scope5:"ext",usephase:"yes",real:"no",system:"car",size:"medium",material:"Steel",mode:"single stroke",scope:"lub",use:"changed",basis:"km",drains:"yes",lifemode:"direct",effects:[],carrier:"el",emis:"no",lcc:"no"};
+const Q=[
+ {k:"scope5",t:"Which scope?",h:"Lubricant focus: the reference flow is the lubricant. Functional focus: the reference flow is the service of the lubricated system.",o:[
+   ["ctg","Cradle-to-Gate","just production, m = m_lube","lub"],["ctgp","Cradle-to-Gate (performance adjusted)","production per lifetime-adjusted kg","lub"],["flc","Full Life Cycle (excl. performance)","consumption over the service, same intervals","lub"],
+   ["ext","Full Life Cycle (incl. drain intervals, energy consumption, material substitution)","lubricant plus selected effects","fun"],["sys","Applied Systems (car, metal working)","duplicated ecoinvent processes","fun"]]},
+ {k:"system",t:"Which ecoinvent system?",h:"Each one is available as a parametrised JSON-LD duplicate for openLCA.",o:[
+   ["car","Passenger car, diesel, EURO 3","FU: 1 km"],["mach","Machining","FU: n parts × part mass"],["draw","Deep drawing, steel","FU: n parts × part mass"]]},
+ {k:"size",t:"Which car size?",h:"Sets the car mass and the ecoinvent diesel consumption.",o:[["medium","Medium","1,600 kg, 0.0606 kg diesel/km"],["large","Large","2,000 kg, 0.0762 kg diesel/km"]]},
+ {k:"material",t:"Which material is machined?",h:"Sets the ecoinvent process and the composition of the chips.",o:Object.keys(MWMAT).map(m=>[m,m,""])},
+ {k:"mode",t:"Which press mode?",h:"ecoinvent single stroke and automode differ by a factor of about 70 in electricity and machine use.",o:[["single stroke","Single stroke","0.0333 kWh/kg"],["automode","Automode","0.000492 kWh/kg"]]},
+ {k:"use",t:"How is the lubricant used?",h:"Decides how consumption builds up over time.",o:[
+   ["changed","Filled and changed","e.g. engine, hydraulic, compressor"],["ffl","Filled for life","never changed, lasts as long as the component"],
+   ["relub","Initial fill plus relubrication","e.g. greased bearings"],["piece","Applied per piece","e.g. release agents"],["protect","Applied as protection, re-applied","e.g. rust preventives, pipe dope"]]},
+ {k:"basis",t:"What measures the service (lifetime unit)?",h:"Unit of total and interval. The ratio is dimensionless, so only consistency matters.",o:[
+   ["km","Distance","km"],["h","Operational time","operating hours"],["a","Time / operational time","years of operation"],["pcs","Pieces","produced parts"]]},
+ {k:"drains",t:"Are refills or drain intervals counted?",h:"Yes: count every fill over a total service. No: adjust one fill by the lifetime change only.",o:[
+   ["yes","Yes, count every fill","total / interval"],["no","No, lifetime adjusted only","lifetime_lubricant / lifetime_assessed"]]},
+ {k:"lifemode",t:"How is the lifetime change given?",h:"From wear volume: the lifetime changes with the inverse of the wear volume measured in the same test with the same duration (e.g. gear oils).",o:[
+   ["direct","Lifetime directly","lifetime_lubricant and lifetime_assessed"],["wear","From wear volume","mm³ in the same test, reference vs assessed"]]},
+ {k:"effects",multi:true,t:"Which effects beyond the lubricant?",h:"Each choice adds one flow to the lubricant consumption. None keeps only the drain intervals.",o:[
+   ["energy","Energy efficiency","electricity or fuel"],["wear","Wear","worn material replaced"],["corr","Corrosion protection","protected material replaced"],["down","Downtime","fewer pieces produced"]]},
+ {k:"carrier",t:"Which energy carrier?",h:"The source is chosen with the result.",o:[["el","Electricity",""],["fuel","Fuel",""]]},
+ {k:"emis",t:"Is the lubricant burnt or emitted during use?",h:"Direct emissions from use are not modelled; a note is added.",o:[["no","No",""],["yes","Yes","e.g. engine oil"]]},
+ {k:"ploss",t:"Include power loss from simulation?",h:"Adds the friction power loss of both lubricants (kW, e.g. from partner simulations). The difference changes the energy flow; the benchmark keeps its reference energy.",o:[["no","No",""],["yes","Yes","P_loss for reference and assessed lubricant"]]},
+ {k:"lcc",t:"Prepare costs for the LCC?",h:"Adds prices that only feed the LCC and never change the flows.",o:[["no","No",""],["yes","Yes",""]]}
+];
+const GENERIC=["use","basis","drains","lifemode","effects","carrier","emis","lcc"];
+function visible(k){
+  const sc=A.scope5;
+  if(k==="scope5") return true;
+  if(sc==="ctg") return false;
+  if(sc==="sys"){ if(k==="system"||k==="ploss") return true; if(k==="size") return A.system==="car"; if(k==="material") return A.system==="mach"; if(k==="mode") return A.system==="draw"; return false; }
+  if(["system","size","material","mode","usephase","real","drains"].includes(k)) return false;
+  if(k==="use") return sc!=="ctgp";
+  if(k==="ploss") return sc==="ext"&&A.effects.includes("energy");
+  if(k==="lcc") return false;
+  if(k==="lifemode") return sc==="ctgp"||(sc==="ext"&&A.use==="ffl");
+  if(k==="effects"||k==="emis") return false;
+  if(k==="carrier") return false;
+  return true;
+}
+function optDisabled(k,v){
+  if(k==="basis"&&A.use==="piece") return v!=="pcs";
+  if(k==="effects"&&v==="down") return A.basis!=="pcs";
+  return false;
+}
+function normalise(){
+  const sc=A.scope5;
+  A.usephase=sc==="ctg"?"no":"yes"; A.real=sc==="sys"?"yes":"no";
+  if(sc!=="ext") A.effects=[];
+  else A.effects={changed:["energy","wear"],ffl:["energy","wear"],relub:["energy","wear"],piece:["down"],protect:["corr"]}[A.use]||[];
+  if(sc==="ctgp") A.use="changed";
+  A.lcc=(sc==="ext"||sc==="sys")?"yes":"no";
+  if(!(sc==="sys"||(sc==="ext"&&A.effects.includes("energy")))) A.ploss="no";
+  A.carrier=A.basis==="km"?"fuel":"el";
+  A.emis=(sc==="ext"&&A.carrier==="fuel")?"yes":"no";
+  A.scope=A.usephase==="no"?"ctg":(A.effects.length?"ext":"lub");
+  if(A.use==="piece") A.basis="pcs";
+  if(A.basis!=="pcs") A.effects=A.effects.filter(e=>e!=="down");
+  A.drains=sc==="ctgp"?"no":"yes";
+  if(A.use==="ffl"&&sc==="ext") A.drains="no";
+  A.scope=sc==="ctg"?"ctg":(sc==="ext"?"ext":"lub");
+}
+function scopeHTML(q){
+  const btn=([v,l,s])=>`<button class="opt" data-k="${q.k}" data-v="${v}" aria-pressed="${A[q.k]===v}">${esc(l)}<small>${esc(s)}</small></button>`;
+  return `<div class="q"><h2><span class="no">01</span>${esc(q.t)}</h2><p class="hint">${esc(q.h)}</p>
+    <div class="groups"><div class="grp"><div class="gl">Lubricant focus</div><div class="opts col">${q.o.filter(o=>o[3]==="lub").map(btn).join("")}</div></div>
+    <div class="grp fun"><div class="gl">Functional focus</div><div class="opts col">${q.o.filter(o=>o[3]==="fun").map(btn).join("")}</div></div></div></div>`;
+}
+function drawQuest(){
+  let no=0;
+  document.getElementById("quest").innerHTML=Q.map(q=>{if(q.k==="scope5"){no++;return scopeHTML(q);} const vis=visible(q.k); if(vis) no++;
+    return `<div class="q"${vis?"":" hidden"}><h2><span class="no">${String(no).padStart(2,"0")}</span>${esc(q.t)}</h2><p class="hint">${esc(q.h)}</p>
+      <div class="opts" role="group" aria-label="${esc(q.t)}">${q.o.map(([v,l,s])=>{const on=q.multi?A[q.k].includes(v):A[q.k]===v, dis=optDisabled(q.k,v);
+        return `<button class="opt" data-k="${q.k}" data-v="${v}" aria-pressed="${on}"${dis?" disabled":""}>${esc(l)}${s?`<small>${esc(s)}</small>`:""}</button>`;}).join("")}</div></div>`;}).join("");
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{const q=Q.find(x=>x.k===b.dataset.k),v=b.dataset.v;
+    if(q.multi){A[q.k]=A[q.k].includes(v)?A[q.k].filter(x=>x!==v):[...A[q.k],v];} else {if(q.k==="basis"&&A.basis!==v)resetBasis=true;A[q.k]=v;}
+    normalise();render();});
+}
+
+/* ---------- defaults per basis ---------- */
+let resetBasis=false;
+const D={
+ km:{m_lube:4.5,total:200000,interval:[18000,15000],total_benchmark:15000,energy_spec:{el:[0.2,0.204],fuel:[2.156,2.2]},wear_rate:[0.00001,0.000012],failure_rate:[0.00001,0.00002],m_material_protected:100,exchange_threshold:5},
+ h:{m_lube:50,total:40000,interval:[12000,10000],total_benchmark:10000,energy_spec:{el:[14.55,15],fuel:[4.85,5]},wear_rate:[0.0063,0.0075],failure_rate:[0.00005,0.0001],m_material_protected:500,exchange_threshold:5},
+ a:{m_lube:10,total:20,interval:[6,5],total_benchmark:5,energy_spec:{el:[475,500],fuel:[1940,2000]},wear_rate:[0.334,0.4],failure_rate:[1,3],m_material_protected:10,exchange_threshold:25},
+ pcs:{m_lube:0.015,total:500000,interval:[12,10],total_benchmark:10,energy_spec:{el:[0.097,0.1],fuel:[0.29,0.3]},wear_rate:[0.00001,0.000012],failure_rate:[0.000002,0.000005],m_material_protected:5,exchange_threshold:5}};
+const UNIT={km:"km",h:"h",a:"a",pcs:"pcs"}, UW={km:"km",h:"operating hours",a:"years",pcs:"pieces"};
+const V={a:{},b:{}}, SEL={energy_source:"GLO",material_wear:MAT[0],material_protected:MAT[0]};
+
+/* ---------- model assembly ---------- */
+const SV={};
+const SLCC={car:[["price_lubricant","€/kg","lubricant price · LCC only",5],["price_diesel","€/kg","diesel price · LCC only",1.6],["price_vehicle","€/kg","vehicle price per kg car · LCC only",15]],
+  mach:[["price_lubricant","€/kg","metalworking fluid price · LCC only",5],["price_electricity","€/kWh","electricity price · LCC only",0.2],["price_metal","€/kg","price of the workpiece metal · LCC only",2],["price_machine","€/kg","machine tool price per kg machine · LCC only",30]],
+  draw:[["price_lubricant","€/kg","drawing lubricant price · LCC only",4],["price_electricity","€/kWh","electricity price · LCC only",0.2],["price_sheet","€/kg","steel sheet price · LCC only",1],["price_machine","€/kg","press and die price per kg machine · LCC only",20]]};
+const SLCCROWS={car:[["Lubricant cost","€/km",(p,b,S)=>(p.oil_fill/p.drain_interval+p.lube_production/1000*CAR[S.sel.size].mass/p.lifetime_km)*p.price_lubricant],["Diesel cost","€/km",(p,b,S)=>M.x.flows.find(f=>f[0]==="Diesel")[3](p,b,S)*p.price_diesel],["Vehicle cost (production share)","€/km",(p,b,S)=>CAR[S.sel.size].mass/p.lifetime_km*p.price_vehicle]],
+  mach:[["Lubricant cost","€",(p,b)=>p.lube_mwf/1000*b.sump_life/p.sump_life*p.n_parts*p.part_mass*p.price_lubricant],["Electricity cost","€",(p,b,S)=>M.x.flows.find(f=>f[0]==="Electricity")[3](p,b,S)*p.price_electricity],["Workpiece metal cost","€",p=>p.n_parts*p.part_mass*1.227*p.price_metal],["Machine cost (share)","€",p=>p.n_parts*p.part_mass/p.machine_output_mwf*p.price_machine]],
+  draw:[["Lubricant cost","€",p=>p.lube_forming/1000*p.n_parts*p.part_mass*p.price_lubricant],["Electricity cost","€",(p,b,S)=>M.x.flows.find(f=>f[0]==="Electricity")[3](p,b,S)*p.price_electricity],["Steel sheet cost","€",p=>p.n_parts*p.part_mass*p.price_sheet],["Press and die cost (share)","€",p=>p.n_parts*p.part_mass/p.machine_output_forming*p.price_machine]]};
+const PL={car:{p:[["P_loss","kW","friction power loss at the average operating point (simulation); the difference to the benchmark adds or saves diesel"],["avg_speed","km/h","average speed; converts kW to per km"],["eta_conv","–","engine efficiency (fuel → mechanical)"]],d:{P_loss:[1.9,2.0],avg_speed:[50],eta_conv:[0.3]}},
+  mach:{p:[["P_loss","kW","spindle and drive power loss (simulation)"],["machine_hours","h","machine operating hours for the batch"],["eta_conv","–","motor efficiency"]],d:{P_loss:[1.9,2.0],machine_hours:[250],eta_conv:[0.9]}},
+  draw:{p:[["P_loss","kW","press drive power loss (simulation)"],["machine_hours","h","press operating hours for the batch"],["eta_conv","–","motor efficiency"]],d:{P_loss:[1.9,2.0],machine_hours:[100],eta_conv:[0.9]}}};
+const dP=(p,b)=>(b&&p!==b)?p.P_loss-b.P_loss:0;
+function withPloss(x){
+  const P=PL[x.id];
+  const dDiesel=(p,b)=>dP(p,b)/p.avg_speed*3.6/(p.eta_conv*43);
+  const dEl=(p,b)=>dP(p,b)*p.machine_hours/p.eta_conv;
+  const flows=x.flows.map(fl=>{const [lab,u,f,fn,...rest]=fl;
+    if(x.id==="car"&&lab==="Diesel") return [lab,u,f+" + (P_loss − P_loss_benchmark) / avg_speed · 3.6 / (eta_conv · 43)",(p,b,S)=>fn(p,b,S)+dDiesel(p,b),...rest];
+    if(x.id==="car"&&lab.startsWith("CO₂")) return [lab,u,"3.14 · diesel",(p,b,S)=>fn(p,b,S)+3.14*dDiesel(p,b),...rest];
+    if(x.id!=="car"&&lab==="Electricity") return [lab,u,f+" + (P_loss − P_loss_benchmark) · machine_hours / eta_conv",(p,b,S)=>fn(p,b,S)+dEl(p,b),...rest];
+    return fl;});
+  flows.push(["Power loss (friction)",x.id==="car"?"kWh/km":"kWh",x.id==="car"?"P_loss / avg_speed":"P_loss · machine_hours",p=>x.id==="car"?p.P_loss/p.avg_speed:p.P_loss*p.machine_hours]);
+  return {...x,p:[...x.p,...P.p],flows};
+}
+function buildSys(){
+  const x=SYS.find(q=>q.id===A.system);
+  const sel={size:A.size,material:A.material,mode:A.mode,energy_source:ELEC.includes(SEL.energy_source)?SEL.energy_source:"GLO"};
+  const key=x.id+"|"+sel.size+"|"+sel.mode;
+  if(!SV[x.id]||SV[x.id].key!==key){const d=x.defaults(sel),a={},b={};Object.entries(d).forEach(([k,v])=>{a[k]=v[0];b[k]=v.length>1?v[1]:v[0];});SV[x.id]={key,a,b};}
+  const S={a:SV[x.id].a,b:SV[x.id].b,sel}; const d=x.defaults(sel);
+  if(A.ploss==="yes"){Object.entries(PL[x.id].d).forEach(([k,v])=>{if(S.a[k]===undefined){S.a[k]=v[0];S.b[k]=v.length>1?v[1]:v[0];} d[k]=v.length>1?[S.a[k],S.b[k]]:[S.a[k]];});}
+  const lp=A.lcc==="yes"?SLCC[x.id]:[]; lp.forEach(([k,,,v])=>{if(S.a[k]===undefined){S.a[k]=v;S.b[k]=v;} d[k]=[S.a[k]];});
+  return {sys:true,lp,ploss:A.ploss==="yes",lrows:A.lcc==="yes"?SLCCROWS[x.id]:[],x:A.ploss==="yes"?withPloss(x):x,S,dv:d,level:"Applied System · functional focus · ecoinvent "+x.name,P:[],flows:[],lcc:[],sel:[],notes:[]};
+}
+function build(){
+  if(A.usephase==="no") return {level:"Cradle-to-Gate · lubricant focus",P:[],flows:[],lcc:[],sel:[],notes:[],ctg:true};
+  if(A.real==="yes") return buildSys();
+  const u=UNIT[A.basis], d=D[A.basis], P=[], flows=[], lcc=[], sel=[], notes=[];
+  const add=(k,un,h,va,vb,lockB)=>P.push({k,u:un,h,va,vb,lockB});
+  const wearLife=A.lifemode==="wear";
+  const addPC=()=>{ if(wearLife){add("wear_volume_lubricant","mm³","wear volume of the reference lubricant in the tribological test",1);add("wear_volume_assessed","mm³","wear volume of the assessed lubricant, same test and duration",0.84);}
+    else {add("lifetime_change","%","change vs reference lubricant; fills lifetime_assessed (enter this OR lifetime_assessed)",20);add("lifetime_assessed",u,"lifetime reached by the assessed lubricant",Math.round(d.total_benchmark*1.2*1000)/1000);} };
+  const pcF=()=>wearLife?"\nlifetime_assessed = lifetime_lubricant · wear_volume_lubricant / wear_volume_assessed":"";
+  if(A.scope==="ctg") return {level:"Cradle-to-gate · declared unit",P,flows:[],lcc,sel,notes,ctg:true};
+  const ext=A.scope==="ext", noperf=A.scope5==="flc", drains=A.drains==="yes"&&(A.use!=="ffl"||noperf), down=ext&&A.effects.includes("down");
+  const fillWord={changed:"one fill",ffl:"one fill for life",relub:"initial fill",piece:"one application",protect:"one application"}[A.use];
+  add("m_lube","kg",fillWord,d.m_lube);
+  let level, lubF, lubFn;
+  if(!drains&&!ext){
+    level="Cradle-to-Gate (performance adjusted) · lubricant focus";
+    add("lifetime_lubricant",u,"lifetime of the reference lubricant",d.total_benchmark);
+    addPC();
+    lubF="m_lube · lifetime_lubricant / lifetime_assessed"+pcF();
+    lubFn=(p,b)=>p.m_lube*p.lifetime_lubricant/LA(p,b);
+  } else {
+    level=ext?"Full Life Cycle (incl. drain intervals, energy, material) · functional focus":"Full Life Cycle (excl. performance) · lubricant focus";
+    if(down){add("operating_hours","h/a","planned operating hours per year",6000);add("production_rate","pcs/h","pieces per hour while running",100);}
+    else add("total",u,A.basis==="pcs"?"pieces to produce":"total service to fulfil, the same for both",d.total);
+    const tot=down?"pieces_produced":"total", T=p=>down?PIECES(p):p.total;
+    if(drains){
+      if(A.use==="relub"){add("m_relubrication","kg","grease per relubrication",d.m_lube*0.2);if(noperf)add("interval",u,"relubrication interval, same for both (performance excluded)",d.interval[1]); else add("interval",u,"relubrication interval",d.interval[0],d.interval[1]);
+        lubF=`m_lube + m_relubrication · ${tot} / interval`; lubFn=p=>p.m_lube+p.m_relubrication*T(p)/p.interval;}
+      else {const im={ffl:"component lifetime",changed:"drain interval",piece:"pieces per application",protect:"re-application interval"}[A.use];
+        if(noperf)add("interval",u,(A.use==="ffl"?"component lifetime (set = total)":im)+", same for both (performance excluded)",A.use==="ffl"?d.total:d.interval[1]); else add("interval",u,im,d.interval[0],d.interval[1]); lubF=`m_lube · ${tot} / interval`; lubFn=p=>p.m_lube*T(p)/p.interval;}
+    } else {
+      add("lifetime_lubricant",u,"lifetime of one fill with the reference lubricant",d.total_benchmark);
+      addPC();
+      lubF=`m_lube · ${tot} / lifetime_assessed`+pcF();
+      lubFn=(p,b)=>p.m_lube*T(p)/LA(p,b);
+    }
+    if(down){
+      add("cleaning_interval","pcs","pieces between cleaning stops",5000,4000); add("downtime_per_stop","h","downtime per stop",2);
+      flows.push({lab:"Pieces produced",u:"pcs/a",f:"production_rate · operating_hours / (1 + production_rate · downtime_per_stop / cleaning_interval)",fn:PIECES,hb:true});
+      flows.push({lab:"Downtime",u:"h/a",f:"pieces_produced / cleaning_interval · downtime_per_stop",fn:p=>PIECES(p)/p.cleaning_interval*p.downtime_per_stop});
+    }
+    if(ext&&A.effects.includes("energy")){const fuel=A.carrier==="fuel";
+      sel.push(["energy_source",fuel?"Fuel":"Electricity",fuel?FUEL:ELEC]);
+      if(A.ploss==="yes"){
+        add("energy_spec",(fuel?"MJ/":"kWh/")+u,"reference energy demand per unit of total (benchmark lubricant)",d.energy_spec[A.carrier][1]);
+        add("P_loss","kW","friction power loss from simulation",1.9,2.0);
+        if(A.basis!=="h") add("op_hours","h","operating hours over the total service",A.basis==="km"?4000:A.basis==="a"?60000:5000);
+        add("eta_conv","–",fuel?"engine efficiency (fuel → mechanical)":"motor efficiency (electricity → mechanical)",fuel?0.3:0.9);
+        const H=p=>A.basis==="h"?T(p):p.op_hours, hs=A.basis==="h"?tot:"op_hours";
+        const dE=(p,b)=>(b&&p!==b?(p.P_loss-b.P_loss):0)*H(p)/p.eta_conv*(fuel?3.6:1);
+        flows.push({lab:fuel?"Fuel":"Electricity",u:fuel?"MJ":"kWh",f:`energy_spec · ${tot} + (P_loss − P_loss_benchmark) · ${hs} / eta_conv${fuel?" · 3.6":""}`,fn:(p,b)=>p.energy_spec*T(p)+dE(p,b),sk:"energy_source"});
+        flows.push({lab:"Power loss (friction)",u:"kWh",f:`P_loss · ${hs}`,fn:p=>p.P_loss*H(p)});
+      } else {
+        add("energy_spec",(fuel?"MJ/":"kWh/")+u,"energy per unit of total",d.energy_spec[A.carrier][0],d.energy_spec[A.carrier][1]);
+        flows.push({lab:fuel?"Fuel":"Electricity",u:fuel?"MJ":"kWh",f:`energy_spec · ${tot}`,fn:p=>p.energy_spec*T(p),sk:"energy_source"});}}
+    if(ext&&A.effects.includes("wear")){
+      add("wear_rate","kg/"+u,"worn material to be replaced per unit of total",d.wear_rate[0],d.wear_rate[1]);
+      flows.push({lab:"Wear",u:"kg",f:`wear_rate · ${tot}`,fn:p=>p.wear_rate*T(p),sk:"material_wear"});
+      sel.push(["material_wear","Material (wear)",MAT]);}
+    if(ext&&A.effects.includes("corr")){
+      add("m_material_protected","kg","mass of the material protected by the lubricant",d.m_material_protected);
+      add("failure_rate","%/"+u,"corrosion failure per unit of total",d.failure_rate[0],d.failure_rate[1]);
+      add("exchange_threshold","%","failure share at which the whole material is exchanged",d.exchange_threshold);
+      sel.push(["material_protected","Material (protected)",MAT]);
+      flows.push({lab:"Corrosion",u:"kg",f:`if(failure_rate · ${tot} ≥ exchange_threshold; m_material_protected; failure_rate · ${tot} / 100 · m_material_protected)`,
+        fn:p=>{const c=p.failure_rate*T(p);return c>=p.exchange_threshold?p.m_material_protected:c/100*p.m_material_protected;},sk:"material_protected"});}
+    if(A.lcc==="yes"){
+      if(ext&&A.effects.includes("wear")){add("price_material_wear","€/kg","price of worn material or tool · LCC only",5);lcc.push({lab:"Cost of worn material",u:"€",fn:(p,b)=>flows.find(f=>f.lab==="Wear").fn(p,b)*p.price_material_wear});}
+      if(ext&&A.effects.includes("corr")){add("price_material_protected","€/kg","price of protected material · LCC only",5);lcc.push({lab:"Cost of protected material replaced",u:"€",fn:p=>flows.find(f=>f.lab==="Corrosion").fn(p)*p.price_material_protected});}
+      if(down){add("value_per_piece","€/pc","value of one produced piece · LCC only",2);lcc.push({lab:"Value of pieces produced",u:"€/a",fn:p=>PIECES(p)*p.value_per_piece,hb:true});}
+    }
+  }
+  flows.unshift({lab:down?"Lubricant":"Lubricant",u:down?"kg/a":"kg",f:lubF,fn:lubFn});
+  if(down) flows.push({lab:"Lubricant per piece",u:"g/pc",f:"m_lube / interval · 1000",fn:(p,b)=>p.m_lube/(drains?p.interval:LA(p,b))*1000});
+  if(A.lcc==="yes"){add("price_lubricant","€/kg","lubricant price · LCC only",5);lcc.unshift({lab:"Lubricant cost",u:"€",fn:(p,b)=>lubFn(p,b)*p.price_lubricant});
+    if(ext&&A.effects.includes("energy")){add("price_energy",A.carrier==="fuel"?"€/MJ":"€/kWh","energy price · LCC only",A.carrier==="fuel"?0.04:0.2);
+      lcc.splice(1,0,{lab:"Energy cost",u:"€",fn:(p,b)=>flows.find(f=>f.sk==="energy_source").fn(p,b)*p.price_energy});}}
+  if(A.emis==="yes") notes.push("Direct emissions from combustion or release of the lubricant during use are omitted.");
+  if(A.use==="ffl"&&!noperf) notes.push("Fill for life: there are no drain intervals; the fill lasts as long as the component, so its lifetime change drives the result.");
+  const div=(!drains&&!ext)?(p=>p.lifetime_lubricant):(down?(p=>PIECES(p)):(p=>p.total)); const divu=(!drains&&!ext)?u:(down?"pc":u);
+  ["Pieces produced","Lubricant per piece"].forEach(l=>{const f=flows.find(x=>x.lab===l);if(f)f.nodiv=true;});
+  return {level,P,flows,lcc,sel,notes,ext,drains,down,noperf,ctgp:A.scope5==="ctgp",div,divu};
+}
+/* lifetime of the assessed lubricant; the benchmark call (p===b) uses the reference lifetime */
+const LA=(p,b)=>{ if(b&&p===b) return p.lifetime_lubricant; return A.lifemode==="wear"&&p.wear_volume_assessed!==undefined?p.lifetime_lubricant*p.wear_volume_lubricant/p.wear_volume_assessed:p.lifetime_assessed; };
+const PC=(p,b)=>(LA(p,b)/p.lifetime_lubricant-1)*100;
+const PIECES=p=>p.production_rate*p.operating_hours/(1+p.production_rate*p.downtime_per_stop/p.cleaning_interval);
+
+/* ---------- values ---------- */
+let lastBasis=null;
+function syncValues(M){
+  if(M.sys||M.ctg) return;
+  const vk=A.basis+"|"+A.scope5; if(vk!==lastBasis){V.a={};V.b={};lastBasis=vk;}
+  M.P.forEach(p=>{if(!(p.k in V.a)){V.a[p.k]=p.va;V.b[p.k]=p.vb!==undefined?p.vb:p.va;}
+    if(p.lockB) V.b[p.k]=p.vb; if(p.vb===undefined) V.b[p.k]=V.a[p.k];});
+  M.sel.forEach(([k,,opts])=>{if(!opts.includes(SEL[k]))SEL[k]=opts[0];});
+  resetBasis=false;
+}
+
+/* ---------- result ---------- */
+let M;
+function row(lab,u,b,a,hb){const ch=b>0?(a/b-1)*100:0,good=hb?ch>=0:ch<=0;
+  return `<tr><td>${esc(lab)} <span class="flowf">${esc(u)}</span></td><td>${fmt(b)}</td><td>${fmt(a)}</td><td class="${good?"d":"up"}">${ch>0?"+":""}${fmt(ch)} %</td></tr>`;}
+let PER="unit";
+const pcv=(a,b)=>b>0?+((a/b-1)*100).toPrecision(6):0;
+const perbar=(show,lab)=>show?`<div class="perbar" role="group" aria-label="Result basis"><span>Results</span><button type="button" data-per="unit" aria-pressed="${PER==="unit"}">per ${esc(lab)}</button><button type="button" data-per="total" aria-pressed="${PER==="total"}">total</button></div>`:"";
+function chg(a,b,abs){if(abs) return (a>0?"+":"")+fmt(a)+" %"; if(!(b>0))return"–";const c=(a/b-1)*100;return (c>0?"+":"")+fmt(c)+" %";}
+function drawSysResult(r){
+  const {x,S,dv}=M; const two=k=>dv[k]&&dv[k].length>1; const plist=[...x.p,...M.lp];
+  r.innerHTML=`<h3>${esc(x.name)}</h3><span class="badge">${esc(M.level)}</span>
+    <dl class="kv"><dt>FU</dt><dd>${esc(sysFU())}</dd>
+    <dt>Lubricant in ecoinvent</dt><dd>${x.lubes.map(([n,c,h])=>`<div>${esc(n)} <span class="foot">· ${esc(c)} · ${esc(h)}</span></div>`).join("")}</dd>
+    <dt>Flows</dt><dd>${x.flows.map(f=>`<div class="formula">${esc(f[0])}: ${esc(f[2])}</div>`).join("")}</dd>
+    ${x.sel.some(q=>q[0]==="energy_source")?`<dt>Inputs</dt><dd class="sels"><label class="sel"><span>Electricity <code>energy_source</code></span><select id="sel-energy_source" data-k="energy_source">${ELEC.map(o=>`<option${o===S.sel.energy_source?" selected":""}>${esc(o)}</option>`).join("")}</select></label></dd>`:""}
+    <dt>Notes</dt><dd><div class="note-em">${esc(x.note)}</div></dd></dl>
+    <p class="lbl">Parameters · ecoinvent defaults and example values</p><p class="foot" style="margin:0 0 8px">${esc(x.info(S))}</p>
+    <div class="params"><div class="prm head"><span></span><span>Assessed</span><span>ecoinvent benchmark</span><span>Change</span><span></span></div>
+    ${plist.map(([k,u,h])=>`<div class="prm"><code>${esc(k)}</code>
+      <input type="number" step="any" id="sa-${k}" data-k="${k}" data-s="a" value="${S.a[k]}" aria-label="${esc(k)} assessed">
+      <input type="number" step="any" id="sb-${k}" data-k="${k}" data-s="b" value="${S.b[k]}" aria-label="${esc(k)} ecoinvent benchmark"${two(k)?"":" disabled"}>
+      ${two(k)?`<input type="number" step="any" class="chgin" id="sc-${k}" data-pc="${k}" value="${pcv(S.a[k],S.b[k])}" aria-label="${esc(k)} change in percent">`:`<span class="chg">same</span>`}<span class="u">${esc(u)}</span><small>${esc(h)}${two(k)?"":" · same for both"}</small></div>`).join("")}</div>
+    ${perbar(x.id!=="car","kg product")}<div class="flows"><table><thead><tr><th>Flow</th><th>ecoinvent benchmark</th><th>Assessed</th><th>Change</th></tr></thead><tbody id="fl"></tbody></table></div>`;
+  r.querySelectorAll(".params input").forEach(i=>i.oninput=()=>{const v=parseFloat(i.value),k=i.dataset.k,val=isNaN(v)?0:v;
+    if(i.dataset.pc){const kk=i.dataset.pc;S.a[kk]=+(S.b[kk]*(1+val/100)).toPrecision(8);const o=document.getElementById("sa-"+kk);if(o)o.value=S.a[kk];calc();updateText();return;}
+    S[i.dataset.s][k]=val; if(!two(k)){S.a[k]=val;S.b[k]=val;const o=document.getElementById("sb-"+k);if(o)o.value=val;} else {const c=document.getElementById("sc-"+k);if(c)c.value=pcv(S.a[k],S.b[k]);} calc();updateText();});
+  r.querySelectorAll(".perbar button").forEach(bt=>bt.onclick=()=>{PER=bt.dataset.per;r.querySelectorAll(".perbar button").forEach(x=>x.setAttribute("aria-pressed",x===bt));calc();});
+  r.querySelectorAll("select").forEach(sl=>sl.onchange=()=>{SEL.energy_source=sl.value;S.sel.energy_source=sl.value;calc();updateText();});
+  calc();
+}
+function sysFU(){const {x,S}=M; return x.fu+(S.a.n_parts!==undefined?`: ${fmt(S.a.n_parts)} parts of ${fmt(S.a.part_mass)} kg = ${fmt(S.a.n_parts*S.a.part_mass)} kg${x.id==="mach"?" of "+S.sel.material.toLowerCase():""}`:x.id==="car"?` (${S.sel.size} car)`:"")+".";}
+function drawResult(){
+  const r=document.getElementById("result");
+  r.classList.toggle("nobench",!!M.noperf);
+  r.classList.toggle("onecolp",!!M.ctgp);
+  if(M.sys){drawSysResult(r);return;}
+  if(M.ctg){r.innerHTML=`<h3>Production of the lubricant</h3><span class="badge">${esc(M.level)}</span>
+    <dl class="kv"><dt>Declared unit</dt><dd>Production of 1 kg lubricant at the factory gate</dd><dt>Formula</dt><dd><div class="formula">m = m_lube</div></dd>
+    <dt>Reference flow</dt><dd>1 kg lubricant, unpacked</dd><dt>Performance</dt><dd>Not included; no service is delivered within the system boundary.</dd></dl>`;return;}
+  r.innerHTML=`<h3>Your model</h3><span class="badge">${esc(M.level)}</span>
+    <dl class="kv"><dt>FU</dt><dd>${esc(fuText())}</dd>
+    <dt>Flows</dt><dd>${M.flows.map(f=>`<div class="formula">${esc(f.lab)}: ${esc(f.f)}</div>`).join("")}</dd>
+    ${M.sel.length?`<dt>Inputs</dt><dd class="sels">${M.sel.map(([k,lab,opts])=>`<label class="sel"><span>${esc(lab)} <code>${esc(k)}</code></span>
+      <select id="sel-${k}" data-k="${k}">${opts.map(o=>`<option${o===SEL[k]?" selected":""}>${esc(o)}</option>`).join("")}</select></label>`).join("")}</dd>`:""}
+    ${M.notes.length?`<dt>Notes</dt><dd>${M.notes.map(n=>`<div class="note-em">${esc(n)}</div>`).join("")}</dd>`:""}</dl>
+    <p class="lbl">Parameters · example values</p>
+    <div class="params"><div class="prm head"><span></span><span>${M.noperf||M.ctgp?"Value":"Assessed"}</span><span>Benchmark</span><span>Change</span><span></span></div>
+    ${M.P.map((p,i)=>{const same=p.vb===undefined;return `<div class="prm"><code>${esc(p.k)}</code>
+      <input type="number" step="any" id="pa-${p.k}" data-k="${p.k}" data-s="a" value="${V.a[p.k]}" aria-label="${esc(p.k)} assessed">
+      <input type="number" step="any" id="pb-${p.k}" data-k="${p.k}" data-s="b" value="${V.b[p.k]}" aria-label="${esc(p.k)} benchmark"${same||p.lockB?" disabled":""}>
+      ${same||p.lockB?`<span class="chg" data-c="${p.k}">${same?"same":chg(V.a[p.k],V.b[p.k],p.lockB)}</span>`:`<input type="number" step="any" class="chgin" id="pc-${p.k}" data-pc="${p.k}" value="${pcv(V.a[p.k],V.b[p.k])}" aria-label="${esc(p.k)} change in percent">`}<span class="u">${esc(p.u)}</span><small>${esc(p.h.replace(", same for both (performance excluded)","").replace(", the same for both",""))}${M.noperf||M.ctgp?"":same?" · same for both":p.lockB?" · 0 for the benchmark":""}</small></div>`;}).join("")}</div>
+    ${perbar(true,M.divu==="pc"?"piece":M.divu)}<div class="flows"><table><thead><tr><th>Flow</th><th>Benchmark</th><th>${M.noperf?"Value":"Assessed"}</th><th>Change</th></tr></thead><tbody id="fl"></tbody></table></div>`;
+  r.querySelectorAll(".params input").forEach(i=>i.oninput=()=>{const x=parseFloat(i.value),val=isNaN(x)?0:x;
+    if(i.dataset.pc){const k=i.dataset.pc;V.a[k]=+(V.b[k]*(1+val/100)).toPrecision(8);const o=document.getElementById("pa-"+k);if(o)o.value=V.a[k];calc();updateText();return;}
+    const k=i.dataset.k,p=M.P.find(q=>q.k===k);
+    V[i.dataset.s][k]=val; if(p.vb===undefined){V.a[k]=val;V.b[k]=val;const o=document.getElementById("pb-"+k);if(o)o.value=val;} else {const c=document.getElementById("pc-"+k);if(c)c.value=pcv(V.a[k],V.b[k]);}
+    if(k==="lifetime_change"&&V.a.lifetime_lubricant!==undefined){V.a.lifetime_assessed=V.b.lifetime_assessed=+(V.a.lifetime_lubricant*(1+val/100)).toPrecision(8);const o=document.getElementById("pa-lifetime_assessed");if(o)o.value=V.a.lifetime_assessed;}
+    if((k==="lifetime_assessed"||k==="lifetime_lubricant")&&V.a.lifetime_change!==undefined&&V.a.lifetime_lubricant>0){V.a.lifetime_change=V.b.lifetime_change=pcv(V.a.lifetime_assessed,V.a.lifetime_lubricant);const o=document.getElementById("pa-lifetime_change");if(o)o.value=V.a.lifetime_change;}
+    calc();updateText();});
+  r.querySelectorAll(".perbar button").forEach(bt=>bt.onclick=()=>{PER=bt.dataset.per;r.querySelectorAll(".perbar button").forEach(x=>x.setAttribute("aria-pressed",x===bt));calc();});
+  r.querySelectorAll("select").forEach(s=>s.onchange=()=>{SEL[s.dataset.k]=s.value;calc();updateText();});
+  calc();
+}
+function calc(){const el=document.getElementById("fl"); if(!el)return;
+  const pu=(u,d)=>u.replace(/\/a$/,"")+"/"+d;
+  if(M.sys){const {x,S}=M; const per=PER==="unit"&&x.id!=="car", skip=["Finished parts","Formed parts","Lubricating oil per part"];
+    const D=p=>per?p.n_parts*p.part_mass:1, U=(lab,u)=>per&&!skip.includes(lab)?pu(u,"kg product"):u, V2=(lab,v,p)=>per&&!skip.includes(lab)?v/D(p):v;
+    el.innerHTML=x.flows.filter(f=>!(per&&skip.includes(f[0])&&f[0]!=="Lubricating oil per part")).map(([lab,u,,fn,sk,hb])=>row(lab+(sk?", "+S.sel[sk]:""),U(lab,u),V2(lab,fn(S.b,S.b,S),S.b),V2(lab,fn(S.a,S.b,S),S.a),hb)).join("")+(M.lrows.length?`<tr class="sub"><td colspan="4">LCC only · not an openLCA exchange</td></tr>`+M.lrows.map(([lab,u,fn])=>row(lab,U(lab,u),V2(lab,fn(S.b,S.b,S),S.b),V2(lab,fn(S.a,S.b,S),S.a))).join(""):""); return;}
+  const per=PER==="unit", lab=M.divu==="pc"?"pc":M.divu;
+  const val=(f,p,b)=>{const v=f.fn(p,b);return per&&!f.nodiv?v/M.div(p):v;}, un=f=>per&&!f.nodiv?pu(f.u,lab):f.u;
+  el.innerHTML=M.flows.filter(f=>!(per&&f.lab==="Pieces produced")).map(f=>row(f.lab+(f.sk?", "+SEL[f.sk]:""),un(f),val(f,V.b,V.b),val(f,V.a,V.b),f.hb)).join("")+
+    (M.lcc.length?`<tr class="sub"><td colspan="4">LCC only · not an openLCA exchange</td></tr>`+M.lcc.map(c=>row(c.lab,un(c),val(c,V.b,V.b),val(c,V.a,V.b),c.hb)).join(""):"");}
+
+/* ---------- text ---------- */
+const USE={changed:"a lubricated system with a fill that is changed",ffl:"a component filled for life",relub:"a relubricated component",piece:"a production process with the lubricant applied per piece",protect:"a protected component with the product re-applied"};
+function fuText(){
+  if(M.ctg) return "Production of 1 kg lubricant at the factory gate (declared unit).";
+  const u=UW[A.basis], inc=[];
+  if(M.drains) inc.push(A.use==="ffl"?"one fill per component lifetime":A.use==="relub"?"relubrication":A.use==="piece"?"all applications":A.use==="protect"?"re-application":"all drain intervals");
+  if(M.ext){if(A.effects.includes("energy"))inc.push(A.carrier==="fuel"?"fuel consumption":"electricity");if(A.effects.includes("wear"))inc.push("wear");if(A.effects.includes("corr"))inc.push("corrosion");if(A.effects.includes("down"))inc.push("downtime");}
+  const incs=inc.length?", including "+inc.join(", ").replace(/, ([^,]*)$/," and $1"):"";
+  if(M.ctgp) return `Production of the lubricant, adjusted to the lifetime reached relative to the benchmark (per 1 ${u==="operating hours"?"operating hour":u==="years"?"year":u==="pieces"?"piece":u}).`;
+  if(!M.drains&&!M.ext) return `Lubrication of ${USE[A.use]}, adjusted to 1 ${u==="operating hours"?"operating hour":u==="years"?"year":u==="pieces"?"piece":u}, based on the lifetime reached compared with the benchmark.`;
+  if(M.down) return `Lubrication of ${USE[A.use]} for one year of production (${fmt(V.a.operating_hours)} planned operating hours)${incs}.`;
+  return `Lubrication of ${USE[A.use]} over ${fmt(V.a.total)} ${u}${incs}.`;
+}
+function verbal(){
+  if(M.sys){const {x,S}=M;return {fu:sysFU(),rf:x.flows.map(([lab,u,,fn,sk])=>`${lab}${sk?" ("+S.sel[sk]+")":""}: ${fmt(fn(S.a,S.b,S))} ${u} (ecoinvent benchmark: ${fmt(fn(S.b,S.b,S))} ${u})`),
+    desc:`System level (8.2.1.4): the functional unit is the service delivered by the system, and the lubricant is one input among several. ${x.desc} ${x.note}`,lcc:M.lrows.map(([lab,u,fn])=>`${lab}: ${fmt(fn(S.a,S.b,S))} ${u} (ecoinvent benchmark: ${fmt(fn(S.b,S.b,S))} ${u})`)};}
+  if(M.ctg) return {fu:fuText(),rf:["1 kg lubricant, unpacked."],desc:"Cradle-to-gate. No functional unit is defined because no service is delivered within the system boundary; performance is not included.",lcc:[]};
+  const bm=(f,u)=>M.noperf?"":` (benchmark: ${fmt(f(V.b,V.b))} ${u})`;
+  const rf=M.flows.map(f=>`${f.lab}${f.sk?" ("+SEL[f.sk]+")":""}: ${fmt(f.fn(V.a,V.b))} ${f.u}${bm(f.fn,f.u)}`);
+  const parts=[];
+  if(M.ctgp) parts.push("Cradle-to-gate, performance adjusted: the production of the lubricant is expressed per lifetime-adjusted amount (as in Int. J. Life Cycle Assess. 2012); use phase and end of life are not modelled.");
+  else parts.push(M.ext?"Extended system: lubricant plus the selected energy and material effects; each flow is a separate exchange in openLCA.":"Lubricant scope only; energy use and material replacement are excluded.");
+  parts.push(M.noperf?"Performance excluded: both lubricants use the same interval, so only the lubricant amount over the service is quantified.":M.drains?"Performance enters through the interval; the total service is the same for both lubricants.":`Performance enters through the lifetime: ${fmt(LA(V.a,V.b))} (assessed) vs ${fmt(V.a.lifetime_lubricant)} (reference lubricant), ${fmt(PC(V.a,V.b))} %${A.lifemode==="wear"?`, derived from the wear volumes in the same tribological test with the same duration: ${fmt(V.a.wear_volume_assessed)} mm³ (assessed) vs ${fmt(V.a.wear_volume_lubricant)} mm³ (reference)`:""}.`);
+  if(M.down) parts.push("Downtime reduces the pieces produced in the same operating time, so results are also given per piece.");
+  parts.push("Top-up and leakage are not modelled.");
+  return {fu:fuText(),rf,desc:parts.join(" ")+(M.notes.length?" "+M.notes.join(" "):""),lcc:M.lcc.map(c=>`${c.lab}: ${fmt(c.fn(V.a,V.b))} ${c.u}${bm(c.fn,c.u)}`)};
+}
+function updateText(){
+  const t=verbal();
+  document.getElementById("verbal").innerHTML=`<div class="vb"><h4>Functional unit</h4><p>${esc(t.fu)}</p></div>
+    <div class="vb"><h4>Reference flow</h4><ul>${t.rf.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+    <div class="vb"><h4>Description</h4><p>${esc(t.desc)}</p></div>
+    ${t.lcc.length?`<div class="vb"><h4>Costs for LCC</h4><ul>${t.lcc.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}`;
+  const rows=olcaRows();
+  document.getElementById("olca").classList.toggle("onecol",!!(M.noperf||M.ctgp));
+  document.getElementById("olca").innerHTML=`<thead><tr><th>Name</th><th>Type</th><th>${M.noperf||M.ctgp?"Value":"Assessed"}</th><th>Benchmark</th></tr></thead><tbody>${rows.map(r=>`<tr><td><code>${esc(r[0])}</code></td><td>${esc(r[1])}</td><td><code>${esc(r[2])}</code></td><td><code>${esc(r[3])}</code></td></tr>`).join("")}</tbody>`;
+}
+const OL={car:[["oil_fill",1],["lube_production",0.001,"kg per kg car"],["drain_interval",1],["diesel_consumption",1],["lifetime_km",1,null,true]],
+  mach:[["lube_mwf",0.001,"kg/kg"],["sump_life",1],["electricity_mwf",1],["machine_output_mwf",1]],
+  draw:[["lube_forming",0.001,"kg/kg",false,true],["electricity_forming",1],["machine_output_forming",1]]};
+function olcaRows(){
+  if(M.sys){const {x,S}=M,r=[];
+    OL[x.id].forEach(([k,f,unit,single,noBench])=>{const a=+(S.a[k]*f).toPrecision(6),b=+(S.b[k]*f).toPrecision(6);
+      r.push([k,"input"+(unit?" ["+unit+"]":""),String(a),String(single?a:b)]); if(!single&&!noBench) r.push([k+"_benchmark","input",String(b),String(b)]);});
+    if(M.ploss){r.push(["P_loss","input [kW]",String(S.a.P_loss),String(S.b.P_loss)]);r.push(["P_loss_benchmark","input [kW]",String(S.b.P_loss),String(S.b.P_loss)]);
+      PL[x.id].p.slice(1).forEach(([k])=>r.push([k,"input",String(S.a[k]),String(S.a[k])]));}
+    if(x.id==="car"){r.push(["fuel_factor","dependent","diesel_consumption / diesel_consumption_benchmark","same formula"]);r.push(["lifetime_ref","input","150000","150000"]);}
+    if(S.a.n_parts!==undefined) r.push(["product system amount","reference",String(S.a.n_parts*S.a.part_mass)+" kg",String(S.a.n_parts*S.a.part_mass)+" kg"]);
+    if(x.id==="mach") r.push(["process","choose",`metal working, average for ${S.sel.material==="Average metal"?"metal":S.sel.material.toLowerCase()} product manufacturing`,"same"]);
+    if(x.id==="draw") r.push(["process","choose",`deep drawing, steel, 650 kN press, ${S.sel.mode}`,"same"]);
+    if(x.id==="car") r.push(["process","choose",`transport, passenger, car, diesel, ${S.sel.size} size, EURO 3`,"same"]);
+    return r;}
+  if(M.ctg) return [["m_lube","input","1","1"],["product system amount","reference","1 kg","1 kg"]];
+  const r=M.P.filter(p=>!/LCC only/.test(p.h)).map(p=>[p.k,p.k==="lifetime_change"?"info (alternative to lifetime_assessed)":"input",String(V.a[p.k]),String(V.b[p.k])]);
+  if(M.P.some(p=>p.k==="P_loss")) r.push(["P_loss_benchmark","input",String(V.b.P_loss),String(V.b.P_loss)]);
+  if(M.P.some(p=>p.k==="wear_volume_assessed")) r.push(["lifetime_assessed","dependent","lifetime_lubricant * wear_volume_lubricant / wear_volume_assessed","same formula"]);
+  if(M.down) r.push(["pieces_produced","dependent","production_rate * operating_hours / (1 + production_rate * downtime_per_stop / cleaning_interval)","same formula"]);
+  M.sel.forEach(([k])=>r.push([k,"provider choice",SEL[k],SEL[k]]));
+  return r;
+}
+function copy(btn,txt,node){navigator.clipboard.writeText(txt).then(()=>{btn.textContent="Copied";},()=>{const r=document.createRange();r.selectNodeContents(node);const s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent="Selected, press Ctrl+C";}).finally(()=>setTimeout(()=>btn.textContent=btn.dataset.l,1800));}
+const cv=document.getElementById("copyv"),cp=document.getElementById("copyp"); cv.dataset.l=cv.textContent; cp.dataset.l=cp.textContent;
+cv.onclick=()=>{const t=verbal();copy(cv,`Functional unit: ${t.fu}\nReference flow:\n- ${t.rf.join("\n- ")}\nDescription: ${t.desc}${t.lcc.length?"\nCosts for LCC:\n- "+t.lcc.join("\n- "):""}`,document.getElementById("verbal"));};
+cp.onclick=()=>copy(cp,olcaRows().map(r=>r.join("\t")).join("\n"),document.getElementById("olca"));
+
+/* ---------- presets ---------- */
+const G0={lifemode:"direct",carrier:"el",emis:"no",lcc:"no",effects:[]};
+const PRE=[
+ ["Just production",{scope5:"ctg"}],
+ ["Engine oil · performance adjusted",{...G0,scope5:"ctgp",use:"changed",basis:"km"}],
+ ["Gear oil FFL · wear volume",{...G0,scope5:"ctgp",use:"ffl",basis:"h",lifemode:"wear"}],
+ ["Hydraulic oil · excl. performance",{...G0,scope5:"flc",use:"changed",basis:"h"}],
+ ["Engine oil · full",{...G0,scope5:"ext",use:"changed",basis:"km",effects:["energy"],carrier:"fuel",emis:"yes"}],
+ ["Greased bearing · full",{...G0,scope5:"ext",use:"relub",basis:"a",effects:["energy","wear"]}],
+ ["Metalworking fluid · full",{...G0,scope5:"ext",use:"changed",basis:"h",effects:["energy","wear","corr"],lcc:"yes"}],
+ ["Release agent · full",{...G0,scope5:"ext",use:"piece",basis:"pcs",effects:["down"],lcc:"yes"}],
+ ["Rust preventive · full",{...G0,scope5:"ext",use:"protect",basis:"a",effects:["corr"],lcc:"yes"}],
+ ["Diesel car",{scope5:"sys",system:"car",size:"medium"}],
+ ["Machining",{scope5:"sys",system:"mach",material:"Steel"}],
+ ["Deep drawing",{scope5:"sys",system:"draw",mode:"single stroke"}]];
+const pr=document.getElementById("presets");
+PRE.forEach(([n,a])=>{const b=document.createElement("button");b.type="button";b.textContent=n;b.onclick=()=>{const nb=a.basis!==A.basis;Object.assign(A,JSON.parse(JSON.stringify(a)));if(nb)resetBasis=true;normalise();render();};pr.appendChild(b);});
+
+function render(){drawQuest();M=build();syncValues(M);drawResult();updateText();}
+render();
+</script>
+
+</body></html>

@@ -1,0 +1,6 @@
+# ecoinvent-derived data must not be published (ecoinvent EULA)
+openlca/*.zip
+openlca/**/*.json
+*.zolca
+.DS_Store
+~$*
